@@ -49,6 +49,7 @@ const Home: NextPage = () => {
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
+    if (link === "") return;
     newLinkMutate({ link });
   };
 
@@ -80,7 +81,7 @@ const Home: NextPage = () => {
         </div>
       )}
       <div className="flex-1 flex justify-center items-center">
-        <div className="w-[66vw] flex flex-col gap-5">
+        <div className="w-[66vw] max-w-lg flex flex-col gap-5">
           <div className="rounded-md">
             <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
               <input
@@ -113,7 +114,7 @@ const Home: NextPage = () => {
                 type="text"
                 className="rounded-md w-full bg-neutral-700"
                 placeholder="Your shortened URL will display here."
-                value={data?.url}
+                value={shortLink ?? undefined}
               />
               <button
                 className="absolute right-0 h-full aspect-square hover:bg-neutral-500 rounded-md"
