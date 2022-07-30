@@ -24,6 +24,7 @@ model ShortLink {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
+  @@unique([slug])
   @@index([slug])
 }
 

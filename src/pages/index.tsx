@@ -38,19 +38,22 @@ const Home: NextPage = () => {
   } = trpc.proxy.link.newLink.useMutation({
     onSuccess: () => {
       setLink("");
+      setSlug("");
     },
   });
   const shortLink = useMemo(
-    () => (data ? `${getBaseUrl()}/${data.id}` : null),
+    () => (data ? `${getBaseUrl()}/${data.slug}` : null),
     [data]
   );
 
   const [link, setLink] = useState<string>("");
+  const [withSlug, setWithSlug] = useState(false);
+  const [slug, setSlug] = useState<string>("");
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
     if (link === "") return;
-    newLinkMutate({ link });
+    newLinkMutate({ link, slug: withSlug ? slug : undefined });
   };
 
   const [checkIcon, setCheckIcon] = useState(false);
@@ -74,12 +77,14 @@ const Home: NextPage = () => {
   return (
     <div className="w-full min-h-screen bg-neutral-900 text-neutral-100 flex flex-col">
       {sessionStatus === "loading" && <div>Loading user info...</div>}
+
       {sessionStatus === "authenticated" && (
         <div className="flex gap-2">
           <p>Hi {session.user?.name ?? "there"}.</p>
           <button onClick={() => signOut()}>Sign out</button>
         </div>
       )}
+
       <div className="flex-1 flex justify-center items-center">
         <div className="w-[66vw] max-w-lg flex flex-col gap-5">
           <div className="rounded-md">
@@ -91,6 +96,45 @@ const Home: NextPage = () => {
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
               />
+              {!withSlug && (
+                <button
+                  className="bg-indigo-700 p-2 rounded-md"
+                  onClick={() => setWithSlug(true)}
+                >
+                  Choose a slug
+                </button>
+              )}
+              {withSlug && (
+                <div className="flex-1 flex">
+                  <input
+                    type="text"
+                    required
+                    className="rounded-md flex-1 bg-neutral-700"
+                    placeholder="Enter slug"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                  />
+                  <button
+                    className="p-2 text-red-700"
+                    onClick={() => setWithSlug(false)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -108,7 +152,8 @@ const Home: NextPage = () => {
                 {data.url} is shortened to <a href={shortLink}>{shortLink}</a>
               </p>
             )}
-            {isError && <p>{error.message}</p>}
+            {isError && <p>Error: {error.message}</p>}
+
             <div className="bg-neutral-700 relative rounded-md">
               <input
                 type="text"
@@ -156,8 +201,6 @@ const Home: NextPage = () => {
               </button>
             </div>
           </div>
-
-          <p>{error ? error.message : ""}</p>
         </div>
       </div>
     </div>
