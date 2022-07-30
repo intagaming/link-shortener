@@ -18,6 +18,9 @@ export default async function handle(
       },
     },
   });
+
+  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate");
+
   if (!data) {
     res.status(404).json({ error: "not found" });
     return;
