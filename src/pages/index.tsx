@@ -1,14 +1,33 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
+import { unstable_getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { FormEventHandler, useEffect, useMemo, useRef, useState } from "react";
 import { trpc } from "../utils/trpc";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 const getBaseUrl = () => {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return `http://localhost:${process.env.PORT ?? 3000}`;
 };
 
+export const getServerSideProps: GetServerSideProps = async ({ res, req }) => {
+  const session = await unstable_getServerSession(req, res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/api/auth/signin",
+        permanent: false,
+      },
+    };
+  }
+  return { props: {} };
+};
+
 const Home: NextPage = () => {
+  const { data: session, status: sessionStatus } = useSession();
+
   const {
     mutate: newLinkMutate,
     isLoading,
