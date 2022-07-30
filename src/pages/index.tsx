@@ -117,7 +117,7 @@ const Home: NextPage = () => {
                 value={shortLink ?? undefined}
               />
               <button
-                className="absolute right-0 h-full aspect-square hover:bg-neutral-500 rounded-md"
+                className="absolute right-0 h-full aspect-square hover:bg-neutral-500 hover:bg-opacity-50 rounded-md"
                 onClick={handleCopy}
               >
                 <div className="flex justify-center">
