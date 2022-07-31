@@ -10,8 +10,10 @@ const shortLink = (slug: string) => `${getBaseUrl()}/${slug}`;
 
 const List: NextPage = () => {
   const { data, isLoading, error, refetch } = trpc.proxy.link.links.useQuery();
-  const { mutateAsync: updateUrlMutateAsync } =
+  const { mutateAsync: updateUrlMutateAsync, isLoading: updateUrlLoading } =
     trpc.proxy.link.updateLinkUrl.useMutation({ onSuccess: () => refetch() });
+  const { mutateAsync: deleteAsync, isLoading: deleteLoading } =
+    trpc.proxy.link.delete.useMutation({ onSuccess: () => refetch() });
 
   const [editingId, setEditingId] = useState<number>();
 
@@ -31,6 +33,7 @@ const List: NextPage = () => {
             />
             <button
               className="p-2"
+              disabled={updateUrlLoading}
               onClick={() => {
                 toast.promise(
                   updateUrlMutateAsync({ slug: link.slug, url: newUrl }),
@@ -77,7 +80,7 @@ const List: NextPage = () => {
           </div>
         );
       },
-    [updateUrlMutateAsync]
+    [updateUrlLoading, updateUrlMutateAsync]
   );
 
   return (
@@ -98,20 +101,42 @@ const List: NextPage = () => {
           <ul className="flex flex-col divide-y">
             {data.map((link) => (
               <li key={link.id} className="py-4">
-                <div className="flex flex-col">
-                  <p>From: {shortLink(link.slug)}</p>
-                  <p className="flex items-center gap-2">
-                    <span>To:</span>
-                    {editingId !== link.id && <span>{link.url}</span>}
-                    {editingId === link.id && <EditUrl link={link} />}
-                  </p>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col">
+                    <p>From: {shortLink(link.slug)}</p>
+                    <p className="flex items-center gap-2">
+                      <span>To:</span>
+                      {editingId !== link.id && <span>{link.url}</span>}
+                      {editingId === link.id && <EditUrl link={link} />}
+                    </p>
+                  </div>
                   {editingId !== link.id && (
-                    <button
-                      className="bg-indigo-700 rounded-md p-1"
-                      onClick={() => setEditingId(link.id)}
-                    >
-                      Edit destination
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        className="bg-indigo-700 rounded-md p-1"
+                        onClick={() => setEditingId(link.id)}
+                      >
+                        Edit destination
+                      </button>
+                      <button
+                        className="bg-red-700 rounded-md p-1"
+                        disabled={deleteLoading}
+                        onClick={() => {
+                          toast.promise(
+                            deleteAsync({
+                              slug: link.slug,
+                            }),
+                            {
+                              loading: `Deleting /${link.slug}...`,
+                              error: `Failed to delete /${link.slug}`,
+                              success: `Deleted /${link.slug}`,
+                            }
+                          );
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   )}
                 </div>
               </li>

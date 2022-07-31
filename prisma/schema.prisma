@@ -25,7 +25,8 @@ model ShortLink {
   createdAt DateTime @default(now())
 
   @@unique([slug])
-  @@index([slug, userId])
+  @@index([slug])
+  @@index([userId, slug])
 }
 
 // Necessary for Next auth

@@ -106,4 +106,27 @@ export const linkRouter = t.router({
         },
       });
     }),
+
+  delete: authedProcedure
+    .input(z.object({ slug: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const shortLink = await ctx.prisma.shortLink.findFirst({
+        where: {
+          userId: user.id!,
+          slug: input.slug,
+        },
+      });
+      if (!shortLink) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Short link not found",
+        });
+      }
+      await ctx.prisma.shortLink.delete({
+        where: {
+          id: shortLink.id,
+        },
+      });
+    }),
 });
