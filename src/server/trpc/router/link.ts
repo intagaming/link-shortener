@@ -81,7 +81,7 @@ export const linkRouter = t.router({
     });
   }),
 
-  updateLinkUrl: authedProcedure
+  updateUrl: authedProcedure
     .input(z.object({ slug: z.string(), url: z.string().url() }))
     .mutation(async ({ ctx, input }) => {
       const user = ctx.session.user;

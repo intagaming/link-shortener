@@ -10,8 +10,8 @@ const shortLink = (slug: string) => `${getBaseUrl()}/${slug}`;
 
 const List: NextPage = () => {
   const { data, isLoading, error, refetch } = trpc.proxy.link.links.useQuery();
-  const { mutateAsync: updateUrlMutateAsync, isLoading: updateUrlLoading } =
-    trpc.proxy.link.updateLinkUrl.useMutation({ onSuccess: () => refetch() });
+  const { mutateAsync: updateUrlAsync, isLoading: updateUrlLoading } =
+    trpc.proxy.link.updateUrl.useMutation({ onSuccess: () => refetch() });
   const { mutateAsync: deleteAsync, isLoading: deleteLoading } =
     trpc.proxy.link.delete.useMutation({ onSuccess: () => refetch() });
 
@@ -36,7 +36,7 @@ const List: NextPage = () => {
               disabled={updateUrlLoading}
               onClick={() => {
                 toast.promise(
-                  updateUrlMutateAsync({ slug: link.slug, url: newUrl }),
+                  updateUrlAsync({ slug: link.slug, url: newUrl }),
                   {
                     loading: `Updating /${link.slug}...`,
                     error: `Failed to update /${link.slug}`,
@@ -80,7 +80,7 @@ const List: NextPage = () => {
           </div>
         );
       },
-    [updateUrlLoading, updateUrlMutateAsync]
+    [updateUrlLoading, updateUrlAsync]
   );
 
   return (
