@@ -71,4 +71,39 @@ export const linkRouter = t.router({
         });
       }
     }),
+  links: authedProcedure.query(({ ctx }) => {
+    const user = ctx.session.user;
+
+    return ctx.prisma.shortLink.findMany({
+      where: {
+        userId: user.id!,
+      },
+    });
+  }),
+
+  updateLinkUrl: authedProcedure
+    .input(z.object({ slug: z.string(), url: z.string().url() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const shortLink = await ctx.prisma.shortLink.findFirst({
+        where: {
+          userId: user.id!,
+          slug: input.slug,
+        },
+      });
+      if (!shortLink) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Short link not found",
+        });
+      }
+      await ctx.prisma.shortLink.update({
+        where: {
+          id: shortLink.id,
+        },
+        data: {
+          url: input.url,
+        },
+      });
+    }),
 });

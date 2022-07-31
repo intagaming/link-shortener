@@ -4,13 +4,9 @@ import { signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { FormEventHandler, useEffect, useMemo, useRef, useState } from "react";
+import { getBaseUrl } from "../utils/link";
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
-
-const getBaseUrl = () => {
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return `http://localhost:${process.env.PORT ?? 3000}`;
-};
 
 export const getServerSideProps: GetServerSideProps = async ({ res, req }) => {
   const session = await unstable_getServerSession(req, res, authOptions);

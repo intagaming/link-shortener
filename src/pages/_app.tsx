@@ -4,6 +4,7 @@ import { SessionProvider, signOut, useSession } from "next-auth/react";
 import type { AppType } from "next/dist/shared/lib/utils";
 import { trpc } from "../utils/trpc";
 import { ReactNode } from "react";
+import { Toaster } from "react-hot-toast";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const { data: session, status: sessionStatus } = useSession();
@@ -20,6 +21,8 @@ const Layout = ({ children }: { children: ReactNode }) => {
       )}
 
       {children}
+
+      <Toaster />
     </div>
   );
 };
