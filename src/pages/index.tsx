@@ -75,131 +75,120 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-neutral-900 text-neutral-100 flex flex-col">
-      {sessionStatus === "loading" && <div>Loading user info...</div>}
-
-      {sessionStatus === "authenticated" && (
-        <div className="flex gap-2">
-          <p>Hi {session.user?.name ?? "there"}.</p>
-          <button onClick={() => signOut()}>Sign out</button>
-        </div>
-      )}
-
-      <div className="flex-1 flex justify-center items-center">
-        <div className="w-[66vw] max-w-lg flex flex-col gap-5">
-          <div className="rounded-md">
-            <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-              <input
-                type="url"
-                className="rounded-md flex-1 bg-neutral-700"
-                placeholder="Enter URL to shorten"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-              />
-              {!withSlug && (
-                <button
-                  className="bg-indigo-700 p-2 rounded-md"
-                  onClick={() => setWithSlug(true)}
-                >
-                  Choose a slug
-                </button>
-              )}
-              {withSlug && (
-                <div className="flex-1 flex">
-                  <input
-                    type="text"
-                    required
-                    className="rounded-md flex-1 bg-neutral-700"
-                    placeholder="Enter slug"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                  />
-                  <button
-                    className="p-2 text-red-700"
-                    onClick={() => setWithSlug(false)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-
+    <div className="flex-1 flex justify-center items-center">
+      <div className="w-[66vw] max-w-lg flex flex-col gap-5">
+        <div className="rounded-md">
+          <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+            <input
+              type="url"
+              className="rounded-md flex-1 bg-neutral-700"
+              placeholder="Enter URL to shorten"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+            />
+            {!withSlug && (
               <button
-                type="submit"
-                className="p-2 bg-indigo-700 disabled:bg-indigo-900 rounded-md"
-                disabled={isLoading}
+                className="bg-indigo-700 p-2 rounded-md"
+                onClick={() => setWithSlug(true)}
               >
-                {isLoading ? "Shortening..." : "Shorten"}
+                Choose a slug
               </button>
-            </form>
-          </div>
-
-          <div>
-            {isSuccess && shortLink && (
-              <p>
-                {data.url} is shortened to <a href={shortLink}>{shortLink}</a>
-              </p>
             )}
-            {isError && <p>Error: {error.message}</p>}
+            {withSlug && (
+              <div className="flex-1 flex">
+                <input
+                  type="text"
+                  required
+                  className="rounded-md flex-1 bg-neutral-700"
+                  placeholder="Enter slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                />
+                <button
+                  className="p-2 text-red-700"
+                  onClick={() => setWithSlug(false)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
 
-            <div className="bg-neutral-700 relative rounded-md">
-              <input
-                type="text"
-                className="rounded-md w-full bg-neutral-700"
-                placeholder="Your shortened URL will display here."
-                value={shortLink ?? undefined}
-              />
-              <button
-                className="absolute right-0 h-full aspect-square hover:bg-neutral-500 hover:bg-opacity-50 rounded-md"
-                onClick={handleCopy}
-              >
-                <div className="flex justify-center">
-                  {checkIcon ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="p-2 bg-indigo-700 disabled:bg-indigo-900 rounded-md"
+              disabled={isLoading}
+            >
+              {isLoading ? "Shortening..." : "Shorten"}
+            </button>
+          </form>
+        </div>
+
+        <div>
+          {isSuccess && shortLink && (
+            <p>
+              {data.url} is shortened to <a href={shortLink}>{shortLink}</a>
+            </p>
+          )}
+          {isError && <p>Error: {error.message}</p>}
+
+          <div className="bg-neutral-700 relative rounded-md">
+            <input
+              type="text"
+              className="rounded-md w-full bg-neutral-700"
+              placeholder="Your shortened URL will display here."
+              value={shortLink ?? undefined}
+            />
+            <button
+              className="absolute right-0 h-full aspect-square hover:bg-neutral-500 hover:bg-opacity-50 rounded-md"
+              onClick={handleCopy}
+            >
+              <div className="flex justify-center">
+                {checkIcon ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                )}
+              </div>
+            </button>
           </div>
         </div>
       </div>
