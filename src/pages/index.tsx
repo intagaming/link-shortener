@@ -76,8 +76,6 @@ const Home: NextPage = () => {
     <>
       <NextSeo title="Link Shortener" description="Link Shortener." />
 
-      <p>VERCEL_URL: {process.env.VERCEL_URL}</p>
-
       <div className="flex-1 flex justify-center items-center">
         <div className="w-[66vw] max-w-lg flex flex-col gap-5">
           <div className="rounded-md">
