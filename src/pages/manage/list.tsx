@@ -1,5 +1,6 @@
 import { ShortLink } from "@prisma/client";
 import { NextPage } from "next";
+import { NextSeo } from "next-seo";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -84,67 +85,74 @@ const List: NextPage = () => {
   );
 
   return (
-    <div className="flex-1 flex justify-center items-center">
-      <div className="w-[66vw] max-w-lg flex flex-col gap-5">
-        <Link href="/">
-          <a className="bg-indigo-700 p-2 rounded-md text-center">
-            Back to home
-          </a>
-        </Link>
+    <>
+      <NextSeo
+        title="Manage links"
+        description="Manage your shortened links."
+      />
 
-        <h1 className="text-3xl font-bold">Your links</h1>
+      <div className="flex-1 flex justify-center items-center">
+        <div className="w-[66vw] max-w-lg flex flex-col gap-5">
+          <Link href="/">
+            <a className="bg-indigo-700 p-2 rounded-md text-center">
+              Back to home
+            </a>
+          </Link>
 
-        {isLoading && <div>Loading links...</div>}
-        {error && <div>Error: {error.message}</div>}
+          <h1 className="text-3xl font-bold">Your links</h1>
 
-        {data && (
-          <ul className="flex flex-col divide-y">
-            {data.map((link) => (
-              <li key={link.id} className="py-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-col">
-                    <p>From: {shortLink(link.slug)}</p>
-                    <p className="flex items-center gap-2">
-                      <span>To:</span>
-                      {editingId !== link.id && <span>{link.url}</span>}
-                      {editingId === link.id && <EditUrl link={link} />}
-                    </p>
-                  </div>
-                  {editingId !== link.id && (
-                    <div className="flex gap-2">
-                      <button
-                        className="bg-indigo-700 rounded-md p-1"
-                        onClick={() => setEditingId(link.id)}
-                      >
-                        Edit destination
-                      </button>
-                      <button
-                        className="bg-red-700 rounded-md p-1"
-                        disabled={deleteLoading}
-                        onClick={() => {
-                          toast.promise(
-                            deleteAsync({
-                              slug: link.slug,
-                            }),
-                            {
-                              loading: `Deleting /${link.slug}...`,
-                              error: `Failed to delete /${link.slug}`,
-                              success: `Deleted /${link.slug}`,
-                            }
-                          );
-                        }}
-                      >
-                        Delete
-                      </button>
+          {isLoading && <div>Loading links...</div>}
+          {error && <div>Error: {error.message}</div>}
+
+          {data && (
+            <ul className="flex flex-col divide-y">
+              {data.map((link) => (
+                <li key={link.id} className="py-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col">
+                      <p>From: {shortLink(link.slug)}</p>
+                      <p className="flex items-center gap-2">
+                        <span>To:</span>
+                        {editingId !== link.id && <span>{link.url}</span>}
+                        {editingId === link.id && <EditUrl link={link} />}
+                      </p>
                     </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+                    {editingId !== link.id && (
+                      <div className="flex gap-2">
+                        <button
+                          className="bg-indigo-700 rounded-md p-1"
+                          onClick={() => setEditingId(link.id)}
+                        >
+                          Edit destination
+                        </button>
+                        <button
+                          className="bg-red-700 rounded-md p-1"
+                          disabled={deleteLoading}
+                          onClick={() => {
+                            toast.promise(
+                              deleteAsync({
+                                slug: link.slug,
+                              }),
+                              {
+                                loading: `Deleting /${link.slug}...`,
+                                error: `Failed to delete /${link.slug}`,
+                                success: `Deleted /${link.slug}`,
+                              }
+                            );
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
