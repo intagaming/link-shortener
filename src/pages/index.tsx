@@ -2,6 +2,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import Link from "next/link";
 import { FormEventHandler, useEffect, useMemo, useRef, useState } from "react";
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -191,6 +192,11 @@ const Home: NextPage = () => {
             </button>
           </div>
         </div>
+        <Link href="/manage/list">
+          <a className="bg-indigo-700 rounded-md p-2 text-center">
+            Manage your links
+          </a>
+        </Link>
       </div>
     </div>
   );
