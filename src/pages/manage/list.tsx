@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
   Highlight,
-  Hits,
+  InfiniteHits,
   InstantSearch,
   SearchBox,
 } from "react-instantsearch-hooks-web";
@@ -110,7 +110,7 @@ const List: NextPage = () => {
     () =>
       function Hit({ hit }: { hit: AlgoliaLinkHit }) {
         return (
-          <div className="py-4">
+          <div className="py-4 border-l-8 border-indigo-700 px-3">
             <div className="flex flex-col gap-2">
               <div className="flex flex-col">
                 <p>
@@ -197,7 +197,17 @@ const List: NextPage = () => {
                     }}
                     placeholder="Search by URL or slug"
                   />
-                  <Hits hitComponent={Hit} />
+                  <InfiniteHits
+                    hitComponent={Hit}
+                    classNames={{
+                      root: "my-4",
+                      list: "flex flex-col gap-8 my-4",
+                      loadPrevious:
+                        "bg-indigo-700 disabled:bg-neutral-800 disabled:text-neutral-600 p-2 rounded-md",
+                      loadMore:
+                        "bg-indigo-700 disabled:bg-neutral-800 disabled:text-neutral-600 p-2 rounded-md",
+                    }}
+                  />
                 </InstantSearch>
               )}
             </div>
