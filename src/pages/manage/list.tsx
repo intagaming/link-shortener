@@ -100,17 +100,16 @@ const List: NextPage = () => {
   const Hit = useMemo(
     () =>
       function Hit({ hit }: { hit: Hit }) {
-        console.log(editingId, hit);
         return (
           <div className="py-4">
             <div className="flex flex-col gap-2">
               <div className="flex flex-col">
                 <p>From: {shortLink(hit.slug)}</p>
-                <p className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <span>To:</span>
                   {editingId !== hit.objectID && <span>{hit.url}</span>}
                   {editingId === hit.objectID && <EditUrl link={hit} />}
-                </p>
+                </div>
               </div>
               {editingId !== hit.objectID && (
                 <div className="flex gap-2">

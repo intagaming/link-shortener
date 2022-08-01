@@ -2,7 +2,7 @@ import { Prisma, ShortLink } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { env } from "../../../env/server.mjs";
-import { client } from "../../algolia/client";
+import { algoliaClient, algoliaIndex } from "../../algolia/client";
 import { t, authedProcedure } from "../utils";
 
 function makeRandomString(length: number) {
@@ -18,6 +18,14 @@ function makeRandomString(length: number) {
 
 const randomSlugLength = 7;
 const maxRetries = 10;
+
+const convertShortLinkToAlgoliaObject = (link: ShortLink) => {
+  const { id, ...linkWithoutId } = link;
+  return {
+    ...linkWithoutId,
+    objectID: id,
+  };
+};
 
 export const linkRouter = t.router({
   newLink: authedProcedure
@@ -57,6 +65,12 @@ export const linkRouter = t.router({
             slug,
           },
         });
+
+        // Send the new link to Algolia
+        await algoliaIndex
+          .saveObject(convertShortLinkToAlgoliaObject(shortLink))
+          .wait();
+
         return shortLink;
       } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -73,6 +87,7 @@ export const linkRouter = t.router({
         });
       }
     }),
+
   links: authedProcedure.query(({ ctx }) => {
     const user = ctx.session.user;
 
@@ -107,6 +122,14 @@ export const linkRouter = t.router({
           url: input.url,
         },
       });
+
+      // Update the link on Algolia
+      await algoliaIndex
+        .partialUpdateObject({
+          objectID: shortLink.id,
+          url: input.url,
+        })
+        .wait();
     }),
 
   delete: authedProcedure
@@ -130,12 +153,17 @@ export const linkRouter = t.router({
           id: shortLink.id,
         },
       });
+
+      // Delete the link on Algolia
+      await algoliaIndex
+        .deleteBy({ filters: `objectID:${shortLink.id}` })
+        .wait();
     }),
 
   searchApiKey: authedProcedure.query(({ ctx }) => {
     const user = ctx.session.user;
 
-    const privateSearchKey = client.generateSecuredApiKey(
+    const privateSearchKey = algoliaClient.generateSecuredApiKey(
       env.ALGOLIA_SEARCH_API_KEY, // A search key that you keep private
       {
         filters: `userId:${user.id!}`,

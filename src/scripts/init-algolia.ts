@@ -36,6 +36,7 @@ async function main() {
     };
   });
 
+  await index.clearObjects();
   await index.saveObjects(algoliaLinks).wait();
 
   console.log("ok");
