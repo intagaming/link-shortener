@@ -1,5 +1,5 @@
 import { ShortLink } from "@prisma/client";
-import algoliasearch from "algoliasearch";
+import algoliasearch, { SearchClient } from "algoliasearch";
 import { Hit } from "instantsearch.js";
 import { NextPage } from "next";
 import { NextSeo } from "next-seo";
@@ -13,32 +13,23 @@ import {
   InstantSearch,
   Pagination,
   SearchBox,
+  useInstantSearch,
 } from "react-instantsearch-hooks-web";
 import { getBaseUrl } from "../../utils/link";
 import { trpc } from "../../utils/trpc";
-
-const shortLink = (slug: string) => `${getBaseUrl()}/${slug}`;
 
 type AlgoliaLink = Pick<ShortLink, "slug" | "url" | "userId"> & {
   objectID: string;
 };
 type AlgoliaLinkHit = Hit<AlgoliaLink>;
 
-const List: NextPage = () => {
-  const { data, isLoading, error, refetch } = trpc.proxy.link.links.useQuery();
+const InstantSearchWidgets = () => {
+  const { refresh: refreshSearch } = useInstantSearch();
+
   const { mutateAsync: updateUrlAsync, isLoading: updateUrlLoading } =
-    trpc.proxy.link.updateUrl.useMutation({ onSuccess: () => refetch() });
+    trpc.proxy.link.updateUrl.useMutation({ onSuccess: () => refreshSearch() });
   const { mutateAsync: deleteAsync, isLoading: deleteLoading } =
-    trpc.proxy.link.delete.useMutation({ onSuccess: () => refetch() });
-  const { data: searchApiKey, isLoading: isLoadingSearchApiKey } =
-    trpc.proxy.link.searchApiKey.useQuery();
-  const searchClient = useMemo(
-    () =>
-      searchApiKey
-        ? algoliasearch(searchApiKey.appId, searchApiKey.privateSearchKey)
-        : undefined,
-    [searchApiKey]
-  );
+    trpc.proxy.link.delete.useMutation({ onSuccess: () => refreshSearch() });
 
   const [editingId, setEditingId] = useState<string>();
 
@@ -165,6 +156,48 @@ const List: NextPage = () => {
 
   return (
     <>
+      <Configure hitsPerPage={2} />
+      <SearchBox
+        classNames={{
+          input: "w-full bg-neutral-700 rounded-md",
+          submit: "hidden",
+          reset: "hidden",
+        }}
+        placeholder="Search by URL or slug"
+      />
+      <Hits
+        hitComponent={Hit}
+        classNames={{
+          root: "my-4",
+          list: "flex flex-col gap-8 my-4",
+        }}
+      />
+      <Pagination
+        classNames={{
+          list: "flex gap-3",
+          link: "p-2",
+          item: "bg-indigo-700 rounded-md flex text-neutral-300",
+          disabledItem: "!bg-neutral-700 !text-neutral-500",
+          selectedItem: "bg-indigo-500 text-white",
+        }}
+      />
+    </>
+  );
+};
+
+const List: NextPage = () => {
+  const { data: searchApiKey, isLoading: isLoadingSearchApiKey } =
+    trpc.proxy.link.searchApiKey.useQuery();
+  const searchClient = useMemo(
+    () =>
+      searchApiKey
+        ? algoliasearch(searchApiKey.appId, searchApiKey.privateSearchKey)
+        : undefined,
+    [searchApiKey]
+  );
+
+  return (
+    <>
       <NextSeo
         title="Manage links"
         description="Manage your shortened links."
@@ -180,46 +213,17 @@ const List: NextPage = () => {
 
           <h1 className="text-3xl font-bold">Your links</h1>
 
-          {isLoading && <div>Loading links...</div>}
-          {error && <div>Error: {error.message}</div>}
-
-          {data && (
-            <div>
-              {isLoadingSearchApiKey && <div>Loading search...</div>}
-              {!isLoadingSearchApiKey && searchApiKey && searchClient && (
-                <InstantSearch
-                  searchClient={searchClient}
-                  indexName={searchApiKey.indexName}
-                >
-                  <Configure hitsPerPage={2} />
-                  <SearchBox
-                    classNames={{
-                      input: "w-full bg-neutral-700 rounded-md",
-                      submit: "hidden",
-                      reset: "hidden",
-                    }}
-                    placeholder="Search by URL or slug"
-                  />
-                  <Hits
-                    hitComponent={Hit}
-                    classNames={{
-                      root: "my-4",
-                      list: "flex flex-col gap-8 my-4",
-                    }}
-                  />
-                  <Pagination
-                    classNames={{
-                      list: "flex gap-3",
-                      link: "p-2",
-                      item: "bg-indigo-700 rounded-md flex text-neutral-300",
-                      disabledItem: "!bg-neutral-700 !text-neutral-500",
-                      selectedItem: "bg-indigo-500 text-white",
-                    }}
-                  />
-                </InstantSearch>
-              )}
-            </div>
-          )}
+          <div>
+            {isLoadingSearchApiKey && <div>Loading search...</div>}
+            {!isLoadingSearchApiKey && searchApiKey && searchClient && (
+              <InstantSearch
+                searchClient={searchClient}
+                indexName={searchApiKey.indexName}
+              >
+                <InstantSearchWidgets />
+              </InstantSearch>
+            )}
+          </div>
         </div>
       </div>
     </>
