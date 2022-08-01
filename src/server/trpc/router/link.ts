@@ -88,16 +88,6 @@ export const linkRouter = t.router({
       }
     }),
 
-  links: authedProcedure.query(({ ctx }) => {
-    const user = ctx.session.user;
-
-    return ctx.prisma.shortLink.findMany({
-      where: {
-        userId: user.id!,
-      },
-    });
-  }),
-
   updateUrl: authedProcedure
     .input(z.object({ slug: z.string(), url: z.string().url() }))
     .mutation(async ({ ctx, input }) => {
