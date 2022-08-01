@@ -1,13 +1,17 @@
 import { ShortLink } from "@prisma/client";
+import algoliasearch from "algoliasearch";
 import { NextPage } from "next";
 import { NextSeo } from "next-seo";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { Hits, InstantSearch, SearchBox } from "react-instantsearch-hooks-web";
 import { getBaseUrl } from "../../utils/link";
 import { trpc } from "../../utils/trpc";
 
 const shortLink = (slug: string) => `${getBaseUrl()}/${slug}`;
+
+type Hit = Pick<ShortLink, "slug" | "url" | "userId"> & { objectID: string };
 
 const List: NextPage = () => {
   const { data, isLoading, error, refetch } = trpc.proxy.link.links.useQuery();
@@ -15,14 +19,21 @@ const List: NextPage = () => {
     trpc.proxy.link.updateUrl.useMutation({ onSuccess: () => refetch() });
   const { mutateAsync: deleteAsync, isLoading: deleteLoading } =
     trpc.proxy.link.delete.useMutation({ onSuccess: () => refetch() });
-  const { data: searchApiKey } = trpc.proxy.link.searchApiKey.useQuery();
-  console.log("Search api key", searchApiKey);
+  const { data: searchApiKey, isLoading: isLoadingSearchApiKey } =
+    trpc.proxy.link.searchApiKey.useQuery();
+  const searchClient = useMemo(
+    () =>
+      searchApiKey
+        ? algoliasearch(searchApiKey.appId, searchApiKey.privateSearchKey)
+        : undefined,
+    [searchApiKey]
+  );
 
-  const [editingId, setEditingId] = useState<number>();
+  const [editingId, setEditingId] = useState<string>();
 
   const EditUrl = useMemo(
     () =>
-      function EditUrl({ link }: { link: ShortLink }) {
+      function EditUrl({ link }: { link: Hit }) {
         const [newUrl, setNewUrl] = useState<string>(link.url);
 
         return (
@@ -86,6 +97,56 @@ const List: NextPage = () => {
     [updateUrlLoading, updateUrlAsync]
   );
 
+  const Hit = useMemo(
+    () =>
+      function Hit({ hit }: { hit: Hit }) {
+        console.log(editingId, hit);
+        return (
+          <div className="py-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col">
+                <p>From: {shortLink(hit.slug)}</p>
+                <p className="flex items-center gap-2">
+                  <span>To:</span>
+                  {editingId !== hit.objectID && <span>{hit.url}</span>}
+                  {editingId === hit.objectID && <EditUrl link={hit} />}
+                </p>
+              </div>
+              {editingId !== hit.objectID && (
+                <div className="flex gap-2">
+                  <button
+                    className="bg-indigo-700 rounded-md p-1"
+                    onClick={() => setEditingId(hit.objectID)}
+                  >
+                    Edit destination
+                  </button>
+                  <button
+                    className="bg-red-700 rounded-md p-1"
+                    disabled={deleteLoading}
+                    onClick={() => {
+                      toast.promise(
+                        deleteAsync({
+                          slug: hit.slug,
+                        }),
+                        {
+                          loading: `Deleting /${hit.slug}...`,
+                          error: `Failed to delete /${hit.slug}`,
+                          success: `Deleted /${hit.slug}`,
+                        }
+                      );
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      },
+    [EditUrl, deleteAsync, deleteLoading, editingId]
+  );
+
   return (
     <>
       <NextSeo
@@ -107,50 +168,18 @@ const List: NextPage = () => {
           {error && <div>Error: {error.message}</div>}
 
           {data && (
-            <ul className="flex flex-col divide-y">
-              {data.map((link) => (
-                <li key={link.id} className="py-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-col">
-                      <p>From: {shortLink(link.slug)}</p>
-                      <p className="flex items-center gap-2">
-                        <span>To:</span>
-                        {editingId !== link.id && <span>{link.url}</span>}
-                        {editingId === link.id && <EditUrl link={link} />}
-                      </p>
-                    </div>
-                    {editingId !== link.id && (
-                      <div className="flex gap-2">
-                        <button
-                          className="bg-indigo-700 rounded-md p-1"
-                          onClick={() => setEditingId(link.id)}
-                        >
-                          Edit destination
-                        </button>
-                        <button
-                          className="bg-red-700 rounded-md p-1"
-                          disabled={deleteLoading}
-                          onClick={() => {
-                            toast.promise(
-                              deleteAsync({
-                                slug: link.slug,
-                              }),
-                              {
-                                loading: `Deleting /${link.slug}...`,
-                                error: `Failed to delete /${link.slug}`,
-                                success: `Deleted /${link.slug}`,
-                              }
-                            );
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div>
+              {isLoadingSearchApiKey && <div>Loading search...</div>}
+              {!isLoadingSearchApiKey && searchApiKey && searchClient && (
+                <InstantSearch
+                  searchClient={searchClient}
+                  indexName={searchApiKey.indexName}
+                >
+                  <SearchBox />
+                  <Hits hitComponent={Hit} />
+                </InstantSearch>
+              )}
+            </div>
           )}
         </div>
       </div>

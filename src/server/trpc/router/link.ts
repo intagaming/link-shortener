@@ -142,6 +142,10 @@ export const linkRouter = t.router({
       }
     );
 
-    return privateSearchKey;
+    return {
+      appId: env.ALGOLIA_APP_ID,
+      privateSearchKey,
+      indexName: env.ALGOLIA_INDEX_NAME,
+    };
   }),
 });
