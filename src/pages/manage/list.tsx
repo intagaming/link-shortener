@@ -1,5 +1,5 @@
 import { ShortLink } from "@prisma/client";
-import algoliasearch, { SearchClient } from "algoliasearch";
+import algoliasearch from "algoliasearch";
 import { Hit } from "instantsearch.js";
 import { NextPage } from "next";
 import { NextSeo } from "next-seo";
@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
-  Configure,
   Highlight,
   Hits,
   InstantSearch,
