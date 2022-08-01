@@ -4,12 +4,11 @@ import { Hit } from "instantsearch.js";
 import { NextPage } from "next";
 import { NextSeo } from "next-seo";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
   Highlight,
   Hits,
-  HitsProps,
   InstantSearch,
   SearchBox,
 } from "react-instantsearch-hooks-web";
@@ -190,7 +189,14 @@ const List: NextPage = () => {
                   searchClient={searchClient}
                   indexName={searchApiKey.indexName}
                 >
-                  <SearchBox />
+                  <SearchBox
+                    classNames={{
+                      input: "w-full bg-neutral-700 rounded-md",
+                      submit: "hidden",
+                      reset: "hidden",
+                    }}
+                    placeholder="Search by URL or slug"
+                  />
                   <Hits hitComponent={Hit} />
                 </InstantSearch>
               )}
