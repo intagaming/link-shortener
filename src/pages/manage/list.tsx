@@ -1,17 +1,27 @@
 import { ShortLink } from "@prisma/client";
 import algoliasearch from "algoliasearch";
+import { Hit } from "instantsearch.js";
 import { NextPage } from "next";
 import { NextSeo } from "next-seo";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { Hits, InstantSearch, SearchBox } from "react-instantsearch-hooks-web";
+import {
+  Highlight,
+  Hits,
+  HitsProps,
+  InstantSearch,
+  SearchBox,
+} from "react-instantsearch-hooks-web";
 import { getBaseUrl } from "../../utils/link";
 import { trpc } from "../../utils/trpc";
 
 const shortLink = (slug: string) => `${getBaseUrl()}/${slug}`;
 
-type Hit = Pick<ShortLink, "slug" | "url" | "userId"> & { objectID: string };
+type AlgoliaLink = Pick<ShortLink, "slug" | "url" | "userId"> & {
+  objectID: string;
+};
+type AlgoliaLinkHit = Hit<AlgoliaLink>;
 
 const List: NextPage = () => {
   const { data, isLoading, error, refetch } = trpc.proxy.link.links.useQuery();
@@ -33,7 +43,7 @@ const List: NextPage = () => {
 
   const EditUrl = useMemo(
     () =>
-      function EditUrl({ link }: { link: Hit }) {
+      function EditUrl({ link }: { link: AlgoliaLinkHit }) {
         const [newUrl, setNewUrl] = useState<string>(link.url);
 
         return (
@@ -99,15 +109,21 @@ const List: NextPage = () => {
 
   const Hit = useMemo(
     () =>
-      function Hit({ hit }: { hit: Hit }) {
+      function Hit({ hit }: { hit: AlgoliaLinkHit }) {
         return (
           <div className="py-4">
             <div className="flex flex-col gap-2">
               <div className="flex flex-col">
-                <p>From: {shortLink(hit.slug)}</p>
+                <p>
+                  From: {getBaseUrl()}/<Highlight attribute="slug" hit={hit} />
+                </p>
                 <div className="flex items-center gap-2">
                   <span>To:</span>
-                  {editingId !== hit.objectID && <span>{hit.url}</span>}
+                  {editingId !== hit.objectID && (
+                    <span>
+                      <Highlight attribute="url" hit={hit} />
+                    </span>
+                  )}
                   {editingId === hit.objectID && <EditUrl link={hit} />}
                 </div>
               </div>
