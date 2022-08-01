@@ -156,7 +156,6 @@ const InstantSearchWidgets = () => {
 
   return (
     <>
-      <Configure hitsPerPage={2} />
       <SearchBox
         classNames={{
           input: "w-full bg-neutral-700 rounded-md",
