@@ -12,6 +12,10 @@ export const serverSchema = z.object({
   NEXTAUTH_URL: z.string().url(),
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
+  ALGOLIA_APP_ID: z.string(),
+  ALGOLIA_ADMIN_API_KEY: z.string(),
+  ALGOLIA_SEARCH_API_KEY: z.string(),
+  ALGOLIA_INDEX_NAME: z.string(),
 });
 
 /**
@@ -20,7 +24,7 @@ export const serverSchema = z.object({
  * To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 export const clientSchema = z.object({
-  NEXT_PUBLIC_DOMAIN: z.string(),
+  NEXT_PUBLIC_DOMAIN: z.string().optional(),
 });
 
 /**

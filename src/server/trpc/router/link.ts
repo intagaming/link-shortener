@@ -1,6 +1,8 @@
 import { Prisma, ShortLink } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { env } from "../../../env/server.mjs";
+import { client } from "../../algolia/client";
 import { t, authedProcedure } from "../utils";
 
 function makeRandomString(length: number) {
@@ -129,4 +131,17 @@ export const linkRouter = t.router({
         },
       });
     }),
+
+  searchApiKey: authedProcedure.query(({ ctx }) => {
+    const user = ctx.session.user;
+
+    const privateSearchKey = client.generateSecuredApiKey(
+      env.ALGOLIA_SEARCH_API_KEY, // A search key that you keep private
+      {
+        filters: `userId:${user.id!}`,
+      }
+    );
+
+    return privateSearchKey;
+  }),
 });

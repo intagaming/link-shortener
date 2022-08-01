@@ -6,12 +6,15 @@ const prisma = new PrismaClient();
 
 const envSchema = z.object({
   ALGOLIA_APP_ID: z.string(),
-  ALGOLIA_API_KEY: z.string(),
+  ALGOLIA_ADMIN_API_KEY: z.string(),
   ALGOLIA_INDEX_NAME: z.string(),
 });
 const env = envSchema.parse(process.env);
 
-const algoliaClient = algoliasearch(env.ALGOLIA_APP_ID, env.ALGOLIA_API_KEY);
+const algoliaClient = algoliasearch(
+  env.ALGOLIA_APP_ID,
+  env.ALGOLIA_ADMIN_API_KEY
+);
 const index = algoliaClient.initIndex(env.ALGOLIA_INDEX_NAME);
 
 async function main() {

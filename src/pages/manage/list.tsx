@@ -15,6 +15,8 @@ const List: NextPage = () => {
     trpc.proxy.link.updateUrl.useMutation({ onSuccess: () => refetch() });
   const { mutateAsync: deleteAsync, isLoading: deleteLoading } =
     trpc.proxy.link.delete.useMutation({ onSuccess: () => refetch() });
+  const { data: searchApiKey } = trpc.proxy.link.searchApiKey.useQuery();
+  console.log("Search api key", searchApiKey);
 
   const [editingId, setEditingId] = useState<number>();
 
