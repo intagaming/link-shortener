@@ -7,9 +7,11 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
+  Configure,
   Highlight,
-  InfiniteHits,
+  Hits,
   InstantSearch,
+  Pagination,
   SearchBox,
 } from "react-instantsearch-hooks-web";
 import { getBaseUrl } from "../../utils/link";
@@ -189,6 +191,7 @@ const List: NextPage = () => {
                   searchClient={searchClient}
                   indexName={searchApiKey.indexName}
                 >
+                  <Configure hitsPerPage={2} />
                   <SearchBox
                     classNames={{
                       input: "w-full bg-neutral-700 rounded-md",
@@ -197,15 +200,20 @@ const List: NextPage = () => {
                     }}
                     placeholder="Search by URL or slug"
                   />
-                  <InfiniteHits
+                  <Hits
                     hitComponent={Hit}
                     classNames={{
                       root: "my-4",
                       list: "flex flex-col gap-8 my-4",
-                      loadPrevious:
-                        "bg-indigo-700 disabled:bg-neutral-800 disabled:text-neutral-600 p-2 rounded-md",
-                      loadMore:
-                        "bg-indigo-700 disabled:bg-neutral-800 disabled:text-neutral-600 p-2 rounded-md",
+                    }}
+                  />
+                  <Pagination
+                    classNames={{
+                      list: "flex gap-3",
+                      link: "p-2",
+                      item: "bg-indigo-700 rounded-md flex text-neutral-300",
+                      disabledItem: "!bg-neutral-700 !text-neutral-500",
+                      selectedItem: "bg-indigo-500 text-white",
                     }}
                   />
                 </InstantSearch>
